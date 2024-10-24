@@ -35,6 +35,8 @@ const searchList = computed(() => {
     task.title.toLowerCase().includes(value.value.toLowerCase())
   )
 })
+
+// Изменения для Влада
 </script>
 
 <template>
