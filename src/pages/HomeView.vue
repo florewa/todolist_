@@ -83,6 +83,7 @@ const searchList = computed(() => {
     font-size: 20px;
     font-weight: 500;
     padding-bottom: 18px;
+    text-align: center;
   }
 
   &-menu {
@@ -107,6 +108,10 @@ const searchList = computed(() => {
       gap: 16px;
       padding: 16px 0;
       border-bottom: 1px solid $primary;
+
+      &:last-child {
+        border-bottom: none;
+      }
 
       &-title {
         flex: 1;
