@@ -25,7 +25,7 @@ const selectOption = (option) => {
 </script>
 
 <template>
-  <div class="custom-select">
+  <div v-outside="() => (isOpen = false)" class="custom-select">
     <div class="custom-select__header" @click="toggleDropdown">
       {{ selectedOption || 'options' }}
       <span class="arrow" :class="{ open: isOpen }">▼</span>
@@ -53,7 +53,8 @@ const selectOption = (option) => {
   user-select: none;
 
   &__header {
-    padding: 10px 15px;
+    padding: 0 15px;
+    height: 48px;
     border: 2px solid $primary;
     border-radius: 8px;
     display: flex;
