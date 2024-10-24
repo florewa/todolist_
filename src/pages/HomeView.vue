@@ -51,15 +51,17 @@ const searchList = computed(() => {
       </div>
       <div class="page-list">
         <!-- Отображаем задачи на основе фильтрации и поиска -->
-        <div v-for="item in searchList" :key="item.id" class="item">
-          <VCheckbox v-model="item.checked" />
-          <div
-            class="item-title"
-            :style="{ textDecoration: item.checked ? 'line-through' : 'none' }"
-          >
-            {{ item.title }}
+        <TransitionGroup name="slide">
+          <div v-for="item in searchList" :key="item.id" class="item">
+            <VCheckbox v-model="item.checked" />
+            <div
+              class="item-title"
+              :style="{ textDecoration: item.checked ? 'line-through' : 'none' }"
+            >
+              {{ item.title }}
+            </div>
           </div>
-        </div>
+        </TransitionGroup>
       </div>
     </div>
   </div>
