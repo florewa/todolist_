@@ -25,17 +25,18 @@ const selectOption = (option) => {
 </script>
 
 <template>
-  <div v-outside="() => (isOpen = false)" class="custom-select">
-    <div class="custom-select__header" @click="toggleDropdown">
-      {{ selectedOption || 'options' }}
-      <span class="arrow" :class="{ open: isOpen }">▼</span>
+  <div v-outside="() => (isOpen = false)" class="select">
+    <div class="select__header" @click="toggleDropdown">
+      {{ selectedOption }}
+      <span class="arrow" :class="{ open: isOpen }"
+        ><img src="src/assets/img/chevron-top.png" alt="" />
+      </span>
     </div>
-
-    <ul v-if="isOpen" class="custom-select__dropdown">
+    <ul v-if="isOpen" class="select__dropdown">
       <li
         v-for="option in options"
         :key="option"
-        class="custom-select__option"
+        class="select__option"
         @click="selectOption(option)"
       >
         {{ option }}
@@ -47,7 +48,7 @@ const selectOption = (option) => {
 <style scoped lang="scss">
 @import '@/assets/scss/variables';
 
-.custom-select {
+.select {
   position: relative;
   cursor: pointer;
   user-select: none;
@@ -56,17 +57,17 @@ const selectOption = (option) => {
     padding: 0 15px;
     height: 48px;
     border: 2px solid $primary;
-    border-radius: 8px;
+    border-radius: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #fff;
+    color: white;
+    background-color: $primary;
   }
 
   &__dropdown {
     position: absolute;
     width: 100%;
-    margin-top: 5px;
     background-color: white;
     border: 2px solid $primary;
     border-radius: 8px;
@@ -76,16 +77,20 @@ const selectOption = (option) => {
   }
 
   &__option {
-    padding: 10px 15px;
+    padding: 8px 6px;
+    font-weight: 500;
+    font-size: 16px;
     cursor: pointer;
+    color: $primary;
 
     &:hover {
-      background-color: $primary;
-      color: white;
+      background: rgba(108, 99, 255, 0.2);
     }
   }
 
   .arrow {
+    width: 8px;
+    height: 8px;
     transition: transform 0.2s ease;
   }
 

@@ -1,39 +1,90 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 import VInput from '@/components/VInput.vue'
 import VCheckbox from '@/components/VCheckbox.vue'
 import VSelect from '@/components/VSelect.vue'
+import VAdd from '@/components/VAdd.vue'
 
-const list = ref([
-  { id: 1, title: 'Задача 1', checked: false },
-  { id: 2, title: 'Задача 2', checked: true },
-  { id: 3, title: 'Задача 3', checked: false },
-])
+const loadTasksFromLocalStorage = () => {
+  const tasks = localStorage.getItem('tasks')
+  return tasks ? JSON.parse(tasks) : []
+}
+const list = ref(loadTasksFromLocalStorage())
 
-// Поле для поиска
+const saveTasksToLocalStorage = (tasks) => {
+  localStorage.setItem('tasks', JSON.stringify(tasks))
+}
+watch(
+  list,
+  (newList) => {
+    saveTasksToLocalStorage(newList)
+  },
+  { deep: true }
+)
+const options = ref(['All', 'Checked', 'Unchecked'])
+const selectedOption = ref('All')
+
 const value = ref('')
 
-// Опции для фильтрации: Все, Выполненные, Невыполненные
-const options = ref(['All', 'Checked', 'Unchecked'])
-const selectedOption = ref('All') // По умолчанию отображаем все задачи
-
-// Фильтруем задачи в зависимости от выбранного значения в селекте
 const filteredList = computed(() => {
   if (selectedOption.value === 'Checked') {
-    return list.value.filter((task) => task.checked) // Только выполненные задачи
+    return list.value.filter((task) => task.checked)
   } else if (selectedOption.value === 'Unchecked') {
-    return list.value.filter((task) => !task.checked) // Только невыполненные задачи
+    return list.value.filter((task) => !task.checked)
   }
-  return list.value // Все задачи
+  return list.value
 })
 
-// Функция для поиска по списку задач
 const searchList = computed(() => {
   if (!value.value) return filteredList.value
   return filteredList.value.filter((task) =>
     task.title.toLowerCase().includes(value.value.toLowerCase())
   )
+})
+
+const isPopupOpen = ref(false)
+
+const togglePopup = () => {
+  isPopupOpen.value = !isPopupOpen.value
+}
+const applyChanges = (newTaskTitle) => {
+  if (newTaskTitle) {
+    const newTask = {
+      id: list.value.length + 1,
+      title: newTaskTitle,
+      checked: false,
+    }
+    list.value.push(newTask)
+  }
+}
+const editTask = (task) => {
+  task.isEditing = true
+  task.editTitle = task.title
+}
+
+const saveTask = (task) => {
+  task.title = task.editTitle
+  task.isEditing = false
+}
+
+const cancelEdit = (task) => {
+  task.isEditing = false
+  task.editTitle = ''
+}
+
+const deleteTask = (task) => {
+  list.value = list.value.filter((t) => t.id !== task.id)
+}
+const theme = ref(localStorage.getItem('theme') || 'light')
+
+const toggleTheme = () => {
+  theme.value = theme.value === 'light' ? 'dark' : 'light'
+  localStorage.setItem('theme', theme.value)
+}
+
+watch(theme, (newTheme) => {
+  document.body.className = newTheme
 })
 </script>
 
@@ -48,20 +99,58 @@ const searchList = computed(() => {
         <div class="page-select">
           <VSelect v-model="selectedOption" :options="options" />
         </div>
+
+        <!--        тему не сделал, спать захотел)-->
+        <!--        <div class="theme-select"><button @click="toggleTheme" class="theme-switcher"/></div>-->
       </div>
-      <div class="page-list">
-        <!-- Отображаем задачи на основе фильтрации и поиска -->
-        <TransitionGroup name="slide">
-          <div v-for="item in searchList" :key="item.id" class="item">
-            <VCheckbox v-model="item.checked" />
-            <div
-              class="item-title"
-              :style="{ textDecoration: item.checked ? 'line-through' : 'none' }"
-            >
-              {{ item.title }}
+      <div v-if="searchList.length === 0" class="no-results">
+        <img src="src/assets/img/Detective-check-footprint%201.png" alt="" />
+        <div class="text">Empty...</div>
+      </div>
+      <div v-else class="page-list">
+        <div v-for="item in searchList" :key="item.id" class="item">
+          <VCheckbox v-model="item.checked" />
+          <div class="item-content">
+            <div class="item-input">
+              <div v-if="item.isEditing">
+                <input v-model="item.editTitle" class="item-title-input" />
+              </div>
+              <div
+                v-else
+                class="item-title"
+                :style="{
+                  textDecoration: item.checked ? 'line-through' : 'none',
+                }"
+              >
+                {{ item.title }}
+              </div>
+            </div>
+
+            <div class="item-actions">
+              <div v-if="!item.isEditing" class="edit-delete-buttons">
+                <button @click="editTask(item)">
+                  <img src="src/assets/img/edit.png" />
+                </button>
+                <button @click="deleteTask(item)">
+                  <img src="src/assets/img/delete.png" alt="" />
+                </button>
+              </div>
+              <div v-else class="save-close-buttons">
+                <button @click="saveTask(item)">
+                  <img src="src/assets/img/diskettee.png" alt="" />
+                </button>
+                <button @click="cancelEdit(item)">
+                  <img src="src/assets/img/closee.png" alt="" />
+                </button>
+              </div>
             </div>
           </div>
-        </TransitionGroup>
+        </div>
+      </div>
+
+      <div class="add">
+        <button class="add-task" @click="togglePopup">+</button>
+        <VAdd :show="isPopupOpen" @close="togglePopup" @apply="applyChanges" />
       </div>
     </div>
   </div>
@@ -77,7 +166,9 @@ const searchList = computed(() => {
   padding: 40px 0;
 
   &-container {
+    position: relative;
     width: 750px;
+    height: 100%;
     margin: 0 auto;
   }
 
@@ -92,6 +183,22 @@ const searchList = computed(() => {
     display: flex;
     gap: 16px;
   }
+  .no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 0;
+
+    img {
+      margin-bottom: 20px;
+    }
+
+    .text {
+      font-size: 20px;
+      color: black;
+    }
+  }
 
   &-search {
     flex: 1;
@@ -102,7 +209,7 @@ const searchList = computed(() => {
   }
 
   &-list {
-    padding: 30px 0;
+    padding: 30px 115px;
 
     .item {
       display: flex;
@@ -118,6 +225,51 @@ const searchList = computed(() => {
       &-title {
         flex: 1;
       }
+
+      &-content {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .item-title-input {
+      }
+
+      .item-actions {
+        display: flex;
+        gap: 8px;
+
+        .edit-delete-buttons {
+          display: none;
+        }
+      }
+
+      &:hover .edit-delete-buttons {
+        display: flex;
+      }
+    }
+  }
+
+  .add-task {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: $primary;
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: darken($primary, 10%);
     }
   }
 }
