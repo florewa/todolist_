@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps({
-  modelValue: Boolean, // Управление состоянием чекбокса
+  modelValue: Boolean,
 })
 
 const emits = defineEmits(['update:modelValue'])

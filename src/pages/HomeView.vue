@@ -1,16 +1,18 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
-
+import { ref, computed, watch, onMounted } from 'vue'
 import VInput from '@/components/VInput.vue'
 import VCheckbox from '@/components/VCheckbox.vue'
 import VSelect from '@/components/VSelect.vue'
-import VAdd from '@/components/VAdd.vue'
+import VPopup from '@/components/VPopup.vue'
 
 const loadTasksFromLocalStorage = () => {
   const tasks = localStorage.getItem('tasks')
   return tasks ? JSON.parse(tasks) : []
 }
-const list = ref(loadTasksFromLocalStorage())
+const list = ref([])
+onMounted(() => {
+  list.value = loadTasksFromLocalStorage()
+})
 
 const saveTasksToLocalStorage = (tasks) => {
   localStorage.setItem('tasks', JSON.stringify(tasks))
@@ -22,9 +24,9 @@ watch(
   },
   { deep: true }
 )
-const options = ref(['All', 'Checked', 'Unchecked'])
-const selectedOption = ref('All')
 
+const options = ref(['All', 'Checked', 'Unchecked'])
+const selectedOption = ref('ALL')
 const value = ref('')
 
 const filteredList = computed(() => {
@@ -43,11 +45,6 @@ const searchList = computed(() => {
   )
 })
 
-const isPopupOpen = ref(false)
-
-const togglePopup = () => {
-  isPopupOpen.value = !isPopupOpen.value
-}
 const applyChanges = (newTaskTitle) => {
   if (newTaskTitle) {
     const newTask = {
@@ -58,6 +55,7 @@ const applyChanges = (newTaskTitle) => {
     list.value.push(newTask)
   }
 }
+
 const editTask = (task) => {
   task.isEditing = true
   task.editTitle = task.title
@@ -76,16 +74,12 @@ const cancelEdit = (task) => {
 const deleteTask = (task) => {
   list.value = list.value.filter((t) => t.id !== task.id)
 }
-const theme = ref(localStorage.getItem('theme') || 'light')
 
-const toggleTheme = () => {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
-  localStorage.setItem('theme', theme.value)
+const isPopupOpen = ref(false)
+
+const togglePopup = () => {
+  isPopupOpen.value = !isPopupOpen.value
 }
-
-watch(theme, (newTheme) => {
-  document.body.className = newTheme
-})
 </script>
 
 <template>
@@ -99,63 +93,62 @@ watch(theme, (newTheme) => {
         <div class="page-select">
           <VSelect v-model="selectedOption" :options="options" />
         </div>
-
-        <!--        тему не сделал, спать захотел)-->
-        <!--        <div class="theme-select"><button @click="toggleTheme" class="theme-switcher"/></div>-->
       </div>
       <div v-if="searchList.length === 0" class="no-results">
         <img src="src/assets/img/Detective-check-footprint%201.png" alt="" />
         <div class="text">Empty...</div>
       </div>
       <div v-else class="page-list">
-        <div v-for="item in searchList" :key="item.id" class="item">
-          <VCheckbox v-model="item.checked" />
-          <div class="item-content">
-            <div class="item-input">
-              <div v-if="item.isEditing">
-                <input v-model="item.editTitle" class="item-title-input" />
+        <transition-group name="fade">
+          <div v-for="item in searchList" :key="item.id" class="item">
+            <VCheckbox v-model="item.checked" />
+            <div class="item-content">
+              <div class="item-input">
+                <div v-if="item.isEditing">
+                  <input v-model="item.editTitle" class="item-title-input" />
+                </div>
+                <div
+                  v-else
+                  class="item-title"
+                  :style="{
+                    textDecoration: item.checked ? 'line-through' : 'none',
+                  }"
+                >
+                  {{ item.title }}
+                </div>
               </div>
-              <div
-                v-else
-                class="item-title"
-                :style="{
-                  textDecoration: item.checked ? 'line-through' : 'none',
-                }"
-              >
-                {{ item.title }}
-              </div>
-            </div>
-
-            <div class="item-actions">
-              <div v-if="!item.isEditing" class="edit-delete-buttons">
-                <button @click="editTask(item)">
-                  <img src="src/assets/img/edit.png" />
-                </button>
-                <button @click="deleteTask(item)">
-                  <img src="src/assets/img/delete.png" alt="" />
-                </button>
-              </div>
-              <div v-else class="save-close-buttons">
-                <button @click="saveTask(item)">
-                  <img src="src/assets/img/diskettee.png" alt="" />
-                </button>
-                <button @click="cancelEdit(item)">
-                  <img src="src/assets/img/closee.png" alt="" />
-                </button>
+              <div class="item-actions">
+                <div v-if="!item.isEditing" class="edit-delete-buttons">
+                  <button @click="editTask(item)">
+                    <img src="src/assets/img/edit.png" />
+                  </button>
+                  <button @click="deleteTask(item)">
+                    <img src="src/assets/img/delete.png" alt="" />
+                  </button>
+                </div>
+                <div v-else class="save-close-buttons">
+                  <button @click="saveTask(item)">
+                    <img src="src/assets/img/diskettee.png" alt="" />
+                  </button>
+                  <button @click="cancelEdit(item)">
+                    <img src="src/assets/img/closee.png" alt="" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </transition-group>
       </div>
 
-      <div class="add">
-        <button class="add-task" @click="togglePopup">+</button>
-        <VAdd :show="isPopupOpen" @close="togglePopup" @apply="applyChanges" />
-      </div>
+      <button class="add-task" @click="togglePopup">+</button>
+      <VPopup
+        :show="isPopupOpen"
+        @update:show="togglePopup"
+        @apply="applyChanges"
+      />
     </div>
   </div>
 </template>
-
 <style scoped lang="scss">
 @import '@/assets/scss/variables';
 
@@ -183,6 +176,7 @@ watch(theme, (newTheme) => {
     display: flex;
     gap: 16px;
   }
+
   .no-results {
     display: flex;
     flex-direction: column;

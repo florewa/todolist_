@@ -2,46 +2,46 @@
 import { ref } from 'vue'
 
 const props = defineProps({
-  modelValue: String, // Текущее значение селекта
-  options: Array, // Опции для выбора
+  modelValue: String,
+  options: Array,
 })
 
 const emits = defineEmits(['update:modelValue'])
 
-const isOpen = ref(false) // Управляет открытием/закрытием списка опций
-const selectedOption = ref(props.modelValue) // Текущее выбранное значение
+const isOpen = ref(false)
+const selectedOption = ref(props.modelValue)
 
-// Переключение открытия списка
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
 }
 
-// Выбор опции
 const selectOption = (option) => {
   selectedOption.value = option
-  emits('update:modelValue', option) // Обновляем значение в родительском компоненте
-  isOpen.value = false // Закрываем список после выбора
+  emits('update:modelValue', option)
+  isOpen.value = false
 }
 </script>
 
 <template>
   <div v-outside="() => (isOpen = false)" class="select">
-    <div class="select__header" @click="toggleDropdown">
+    <div class="select-header" @click="toggleDropdown">
       {{ selectedOption }}
       <span class="arrow" :class="{ open: isOpen }"
         ><img src="src/assets/img/chevron-top.png" alt="" />
       </span>
     </div>
-    <ul v-if="isOpen" class="select__dropdown">
-      <li
-        v-for="option in options"
-        :key="option"
-        class="select__option"
-        @click="selectOption(option)"
-      >
-        {{ option }}
-      </li>
-    </ul>
+    <transition name="fade">
+      <ul v-if="isOpen" class="select-dropdown">
+        <li
+          v-for="option in options"
+          :key="option"
+          class="select-option"
+          @click="selectOption(option)"
+        >
+          {{ option }}
+        </li>
+      </ul>
+    </transition>
   </div>
 </template>
 
@@ -53,7 +53,7 @@ const selectOption = (option) => {
   cursor: pointer;
   user-select: none;
 
-  &__header {
+  &-header {
     padding: 0 15px;
     height: 48px;
     border: 2px solid $primary;
@@ -65,7 +65,7 @@ const selectOption = (option) => {
     background-color: $primary;
   }
 
-  &__dropdown {
+  &-dropdown {
     position: absolute;
     width: 100%;
     background-color: white;
@@ -76,7 +76,7 @@ const selectOption = (option) => {
     overflow-y: auto;
   }
 
-  &__option {
+  &-option {
     padding: 8px 6px;
     font-weight: 500;
     font-size: 16px;
