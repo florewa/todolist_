@@ -1,0 +1,16 @@
+@import '@/assets/scss/variables';
+:root {
+  --background: #fff; /* Светлый фон по умолчанию */
+  --text-color: black; /* Цвет текста по умолчанию */
+  --input-border: 2px solid #6C63FF; /* Цвет границы для input в светлой теме */
+  --placeholder-color: #C3C1E5; /* Цвет текста подсказки в светлой теме */
+}
+
+.page {
+  &.dark {
+    --background: #252525; /* Темный фон */
+    --text-color: white; /* Цвет текста в темной теме */
+    --input-border: 2px solid white; /* Цвет границы для input в темной теме */
+    --placeholder-color: #555; /* Цвет текста подсказки в темной теме */
+  }
+}

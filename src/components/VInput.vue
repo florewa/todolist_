@@ -5,6 +5,7 @@ defineProps({
   modelValue: String,
   placeholder: String,
   type: String,
+  icon: String,
 })
 const emits = defineEmits(['update:modelValue'])
 
@@ -26,25 +27,33 @@ const click = () => {
       :placeholder="placeholder"
       :class="[type]"
     />
+    <img v-if="icon" :src="icon" class="input-icon" />
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import '@/assets/scss/variables';
+@import '@/assets/scss/css';
 
 .input {
+  position: relative;
   input {
+    width: 100%;
     height: 38px;
     font-family: $fontSecond;
-    width: 100%;
     border-radius: 8px;
-    border: 2px solid $primary;
+    border: var(--input-border);
     padding: 11px 16px;
-    color: $primary;
-
-    &::placeholder {
-      color: #c3c1e5;
-    }
+    color: var(--text-color);
+    background: transparent;
+  }
+  img {
+    width: 21px;
+    height: 21px;
+    bottom: 8.5px;
+    right: 16px;
+    position: absolute;
+    pointer-events: none;
   }
 }
 </style>

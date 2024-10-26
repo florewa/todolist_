@@ -45,7 +45,7 @@ const onCancel = () => {
 .cancel-button {
   font-size: 18px;
   font-weight: 500;
-  background-color: white;
+  background-color: transparent;
   color: $primary;
   border: 1px solid $primary;
   padding: 10px 22px;

@@ -23,8 +23,8 @@ const applyChanges = () => {
 
 <template>
   <transition name="fade">
-    <div v-if="show" class="popup" @click.self="closePopup">
-      <div class="popup-content">
+    <div v-if="show" class="popup" @click="closePopup">
+      <div class="popup-content" @click.stop>
         <div class="popup-content-title">New note</div>
         <div class="popup-content-input">
           <VInput v-model="newTaskTitle" placeholder="Input your note..." />
@@ -37,9 +37,9 @@ const applyChanges = () => {
   </transition>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import '@/assets/scss/variables';
-
+@import '@/assets/scss/css';
 .popup {
   position: fixed;
   inset: 0;
@@ -50,7 +50,8 @@ const applyChanges = () => {
   z-index: 5;
 
   &-content {
-    background-color: white;
+    background: var(--background);
+    color: var(--text-color);
     padding: 18px 30px;
     border-radius: 16px;
     width: 500px;

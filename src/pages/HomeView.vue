@@ -87,11 +87,21 @@ const toggleTheme = (newTheme) => {
   theme.value = newTheme
   localStorage.setItem('theme', newTheme)
 
-  document.querySelector('.page').className = `page ${newTheme}`
+  // Обновляем класс для элемента .page
+  const pageElement = document.querySelector('.page')
+  if (pageElement) {
+    pageElement.className = `page ${newTheme}` // Обновляем класс страницы
+  }
 }
 
 onMounted(() => {
   document.querySelector('.page').className = `page ${theme.value}`
+})
+
+const icon = computed(() => {
+  return theme.value === 'light'
+    ? 'src/assets/img/icon-light.png'
+    : 'src/assets/img/icon-dark.png'
 })
 </script>
 
@@ -102,7 +112,7 @@ onMounted(() => {
         <div class="page-title">TODO LIST</div>
         <div class="page-menu">
           <div class="page-search">
-            <VInput v-model="value" placeholder="Search note..." />
+            <VInput v-model="value" placeholder="Search note..." :icon="icon" />
           </div>
           <div class="page-select">
             <VSelect v-model="selectedOption" :options="options" />
@@ -113,7 +123,7 @@ onMounted(() => {
         </div>
         <div v-if="searchList.length === 0" class="no-results">
           <img src="src/assets/img/Detective-check-footprint%201.png" alt="" />
-          <div class="text">Empty...</div>
+          <div class="text-empty">Empty...</div>
         </div>
         <div v-else class="page-list">
           <transition-group name="fade">
@@ -157,29 +167,25 @@ onMounted(() => {
           </transition-group>
         </div>
 
-        <button class="add-task" @click="togglePopup">+</button>
-        <VPopup
-          :show="isPopupOpen"
-          @update:show="togglePopup"
-          @apply="applyChanges"
-        />
+        <button class="add-task" @click="togglePopup">
+          <img src="src/assets/img/plus.png" alt="" />
+        </button>
+        <VPopup v-model:show="isPopupOpen" @apply="applyChanges" />
       </div>
     </div>
   </transition>
 </template>
 <style scoped lang="scss">
 @import '@/assets/scss/variables';
+@import '@/assets/scss/css';
 
 .page {
-  background-color: white;
+  background-color: var(--background);
+  color: var(--text-color);
   display: flex;
   flex-direction: column;
   padding: 40px 0;
-
-  &.dark {
-    background-color: #252525;
-    color: white;
-  }
+  transition: 0.3s all ease;
 
   &-container {
     position: relative;
@@ -206,6 +212,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     padding: 30px 0;
+    color: var(--text-color);
 
     img {
       margin-bottom: 20px;
@@ -222,7 +229,7 @@ onMounted(() => {
   }
 
   &-select {
-    flex: 0 0 150px;
+    flex: 0 0 93px;
   }
 
   &-list {
@@ -247,14 +254,16 @@ onMounted(() => {
         width: 100%;
         display: flex;
         justify-content: space-between;
+        align-items: center;
       }
 
       .item-title-input {
+        background: transparent;
+        color: var(--text-color);
       }
 
       .item-actions {
         display: flex;
-        gap: 8px;
 
         .edit-delete-buttons {
           display: none;
@@ -284,6 +293,10 @@ onMounted(() => {
     align-items: center;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s ease;
+
+    img {
+      object-position: center;
+    }
 
     &:hover {
       background-color: darken($primary, 10%);

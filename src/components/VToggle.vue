@@ -33,5 +33,9 @@ const toggleTheme = () => {
   width: 38px;
   height: 38px;
   background-color: $primary;
+
+  img {
+    pointer-events: none;
+  }
 }
 </style>
