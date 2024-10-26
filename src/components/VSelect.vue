@@ -54,8 +54,8 @@ const selectOption = (option) => {
   user-select: none;
 
   &-header {
-    padding: 0 15px;
-    height: 48px;
+    height: 38px;
+    padding: 10px;
     border: 2px solid $primary;
     border-radius: 5px;
     display: flex;

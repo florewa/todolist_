@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import VInput from '@/components/VInput.vue'
+import VButtons from '@/components/VButtons.vue'
 
 defineProps({
   show: Boolean,
@@ -29,8 +30,7 @@ const applyChanges = () => {
           <VInput v-model="newTaskTitle" placeholder="Input your note..." />
         </div>
         <div class="popup-content-buttons">
-          <button class="cancel-button" @click="closePopup">Cancel</button>
-          <button class="apply-button" @click="applyChanges">Apply</button>
+          <VButtons :applyAction="applyChanges" :cancelAction="closePopup" />
         </div>
       </div>
     </div>
@@ -65,45 +65,6 @@ const applyChanges = () => {
 
     &-input {
       margin-bottom: 128px;
-    }
-
-    &-buttons {
-      display: flex;
-      justify-content: space-between;
-
-      .apply-button {
-        font-size: 18px;
-        font-weight: 500;
-        background-color: $primary;
-        color: white;
-        padding: 10px 22px;
-        border-radius: 5px;
-        cursor: pointer;
-        text-transform: uppercase;
-
-        &:hover {
-          background-color: white;
-          color: $primary;
-          border: 1px solid $primary;
-        }
-      }
-
-      .cancel-button {
-        font-size: 18px;
-        font-weight: 500;
-        background-color: white;
-        color: $primary;
-        border: 1px solid $primary;
-        padding: 10px 22px;
-        border-radius: 5px;
-        cursor: pointer;
-        text-transform: uppercase;
-
-        &:hover {
-          background-color: $primary;
-          color: white;
-        }
-      }
     }
   }
 }

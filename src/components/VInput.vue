@@ -34,6 +34,7 @@ const click = () => {
 
 .input {
   input {
+    height: 38px;
     font-family: $fontSecond;
     width: 100%;
     border-radius: 8px;

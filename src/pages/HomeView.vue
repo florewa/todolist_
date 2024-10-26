@@ -4,6 +4,7 @@ import VInput from '@/components/VInput.vue'
 import VCheckbox from '@/components/VCheckbox.vue'
 import VSelect from '@/components/VSelect.vue'
 import VPopup from '@/components/VPopup.vue'
+import VToggle from '@/components/VToggle.vue'
 
 const loadTasksFromLocalStorage = () => {
   const tasks = localStorage.getItem('tasks')
@@ -80,74 +81,91 @@ const isPopupOpen = ref(false)
 const togglePopup = () => {
   isPopupOpen.value = !isPopupOpen.value
 }
+const theme = ref(localStorage.getItem('theme') || 'light')
+
+const toggleTheme = (newTheme) => {
+  theme.value = newTheme
+  localStorage.setItem('theme', newTheme)
+
+  document.querySelector('.page').className = `page ${newTheme}`
+}
+
+onMounted(() => {
+  document.querySelector('.page').className = `page ${theme.value}`
+})
 </script>
 
 <template>
-  <div class="page">
-    <div class="page-container">
-      <div class="page-title">TODO LIST</div>
-      <div class="page-menu">
-        <div class="page-search">
-          <VInput v-model="value" placeholder="Search note..." />
+  <transition name="fade">
+    <div class="page" :class="theme">
+      <div class="page-container">
+        <div class="page-title">TODO LIST</div>
+        <div class="page-menu">
+          <div class="page-search">
+            <VInput v-model="value" placeholder="Search note..." />
+          </div>
+          <div class="page-select">
+            <VSelect v-model="selectedOption" :options="options" />
+          </div>
+          <div class="page-toggle">
+            <VToggle :theme="theme" @toggle-theme="toggleTheme" />
+          </div>
         </div>
-        <div class="page-select">
-          <VSelect v-model="selectedOption" :options="options" />
+        <div v-if="searchList.length === 0" class="no-results">
+          <img src="src/assets/img/Detective-check-footprint%201.png" alt="" />
+          <div class="text">Empty...</div>
         </div>
-      </div>
-      <div v-if="searchList.length === 0" class="no-results">
-        <img src="src/assets/img/Detective-check-footprint%201.png" alt="" />
-        <div class="text">Empty...</div>
-      </div>
-      <div v-else class="page-list">
-        <transition-group name="fade">
-          <div v-for="item in searchList" :key="item.id" class="item">
-            <VCheckbox v-model="item.checked" />
-            <div class="item-content">
-              <div class="item-input">
-                <div v-if="item.isEditing">
-                  <input v-model="item.editTitle" class="item-title-input" />
+        <div v-else class="page-list">
+          <transition-group name="fade">
+            <div v-for="item in searchList" :key="item.id" class="item">
+              <VCheckbox v-model="item.checked" />
+              <div class="item-content">
+                <div class="item-input">
+                  <div v-if="item.isEditing">
+                    <input v-model="item.editTitle" class="item-title-input" />
+                  </div>
+                  <div
+                    v-else
+                    class="item-title"
+                    :style="{
+                      textDecoration: item.checked ? 'line-through' : 'none',
+                    }"
+                  >
+                    {{ item.title }}
+                  </div>
                 </div>
-                <div
-                  v-else
-                  class="item-title"
-                  :style="{
-                    textDecoration: item.checked ? 'line-through' : 'none',
-                  }"
-                >
-                  {{ item.title }}
-                </div>
-              </div>
-              <div class="item-actions">
-                <div v-if="!item.isEditing" class="edit-delete-buttons">
-                  <button @click="editTask(item)">
-                    <img src="src/assets/img/edit.png" />
-                  </button>
-                  <button @click="deleteTask(item)">
-                    <img src="src/assets/img/delete.png" alt="" />
-                  </button>
-                </div>
-                <div v-else class="save-close-buttons">
-                  <button @click="saveTask(item)">
-                    <img src="src/assets/img/diskettee.png" alt="" />
-                  </button>
-                  <button @click="cancelEdit(item)">
-                    <img src="src/assets/img/closee.png" alt="" />
-                  </button>
+                <div class="item-actions">
+                  <div v-if="!item.isEditing" class="edit-delete-buttons">
+                    <button @click="editTask(item)">
+                      <img src="src/assets/img/edit.png" />
+                    </button>
+                    <button @click="deleteTask(item)">
+                      <img src="src/assets/img/delete.png" alt="" />
+                    </button>
+                  </div>
+                  <div v-else class="save-close-buttons">
+                    <button @click="saveTask(item)">
+                      <img src="src/assets/img/diskettee.png" alt="" />
+                    </button>
+                    <button @click="cancelEdit(item)">
+                      <img src="src/assets/img/closee.png" alt="" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </transition-group>
-      </div>
+          </transition-group>
+        </div>
 
-      <button class="add-task" @click="togglePopup">+</button>
-      <VPopup
-        :show="isPopupOpen"
-        @update:show="togglePopup"
-        @apply="applyChanges"
-      />
+        <button class="add-task" @click="togglePopup">+</button>
+        <VPopup
+          :show="isPopupOpen"
+          @update:show="togglePopup"
+          @apply="applyChanges"
+        />
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 <style scoped lang="scss">
 @import '@/assets/scss/variables';
@@ -157,6 +175,11 @@ const togglePopup = () => {
   display: flex;
   flex-direction: column;
   padding: 40px 0;
+
+  &.dark {
+    background-color: #252525;
+    color: white;
+  }
 
   &-container {
     position: relative;
