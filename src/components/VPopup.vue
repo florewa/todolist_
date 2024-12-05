@@ -16,7 +16,12 @@ const closePopup = () => {
 }
 
 const applyChanges = () => {
-  emits('apply', newTaskTitle.value)
+  const newTask = {
+    title: newTaskTitle.value,
+    description: 'Описание задачи',
+    completed: 0,
+  }
+  emits('apply', newTask) // Передаём объект задачи
   closePopup()
 }
 </script>

@@ -5,26 +5,13 @@ import VCheckbox from '@/components/VCheckbox.vue'
 import VSelect from '@/components/VSelect.vue'
 import VPopup from '@/components/VPopup.vue'
 import VToggle from '@/components/VToggle.vue'
+import { useStateStore } from '@/store/stateStore.js'
 
-const loadTasksFromLocalStorage = () => {
-  const tasks = localStorage.getItem('tasks')
-  return tasks ? JSON.parse(tasks) : []
-}
-const list = ref([])
-onMounted(() => {
-  list.value = loadTasksFromLocalStorage()
+const store = useStateStore()
+
+onMounted(async () => {
+  await store.readTasks()
 })
-
-const saveTasksToLocalStorage = (tasks) => {
-  localStorage.setItem('tasks', JSON.stringify(tasks))
-}
-watch(
-  list,
-  (newList) => {
-    saveTasksToLocalStorage(newList)
-  },
-  { deep: true }
-)
 
 const options = ref(['All', 'Checked', 'Unchecked'])
 const selectedOption = ref('ALL')
@@ -32,12 +19,16 @@ const value = ref('')
 
 const filteredList = computed(() => {
   if (selectedOption.value === 'Checked') {
-    return list.value.filter((task) => task.checked)
+    return store.tasks.filter((task) => task.completed === 1)
   } else if (selectedOption.value === 'Unchecked') {
-    return list.value.filter((task) => !task.checked)
+    return store.tasks.filter((task) => task.completed === 0)
   }
-  return list.value
+  return store.tasks
 })
+
+const createNewTask = async (newTask) => {
+  await store.createTask(newTask)
+}
 
 const searchList = computed(() => {
   if (!value.value) return filteredList.value
@@ -46,25 +37,17 @@ const searchList = computed(() => {
   )
 })
 
-const applyChanges = (newTaskTitle) => {
-  if (newTaskTitle) {
-    const newTask = {
-      id: list.value.length + 1,
-      title: newTaskTitle,
-      checked: false,
-    }
-    list.value.push(newTask)
-  }
-}
-
 const editTask = (task) => {
   task.isEditing = true
   task.editTitle = task.title
 }
 
 const saveTask = (task) => {
-  task.title = task.editTitle
-  task.isEditing = false
+  if (task.editTitle.trim()) {
+    store.editTask(task.id, task.editTitle.trim())
+    task.title = task.editTitle.trim()
+    task.isEditing = false
+  }
 }
 
 const cancelEdit = (task) => {
@@ -72,8 +55,8 @@ const cancelEdit = (task) => {
   task.editTitle = ''
 }
 
-const deleteTask = (task) => {
-  list.value = list.value.filter((t) => t.id !== task.id)
+const deleteTask = (taskId) => {
+  store.deleteTask(taskId)
 }
 
 const isPopupOpen = ref(false)
@@ -87,22 +70,26 @@ const toggleTheme = (newTheme) => {
   theme.value = newTheme
   localStorage.setItem('theme', newTheme)
 
-  // Обновляем класс для элемента .page
   const pageElement = document.querySelector('.page')
   if (pageElement) {
-    pageElement.className = `page ${newTheme}` // Обновляем класс страницы
+    pageElement.className = `page ${newTheme}`
   }
 }
+
+const toggleTaskStatus = (task) => {
+  const newStatus = task.completed ? 0 : 1
+  store.updateTaskStatus(task.id, newStatus)
+  task.completed = newStatus
+}
+
 
 onMounted(() => {
   document.querySelector('.page').className = `page ${theme.value}`
 })
 
-const icon = computed(() => {
-  return theme.value === 'light'
-    ? 'src/assets/img/icon-light.png'
-    : 'src/assets/img/icon-dark.png'
-})
+const icon = computed(() =>
+  theme.value === 'light' ? '/img/icon-light.png' : '/img/icon-dark.png'
+)
 </script>
 
 <template>
@@ -122,13 +109,16 @@ const icon = computed(() => {
           </div>
         </div>
         <div v-if="searchList.length === 0" class="no-results">
-          <img src="src/assets/img/Detective-check-footprint%201.png" alt="" />
+          <img
+            src="../../public/img/Detective-check-footprint%201.png"
+            alt=""
+          />
           <div class="text-empty">Empty...</div>
         </div>
         <div v-else class="page-list">
           <transition-group name="fade">
             <div v-for="item in searchList" :key="item.id" class="item">
-              <VCheckbox v-model="item.checked" />
+              <VCheckbox v-model="item.checked" @change="toggleTaskStatus(item)" />
               <div class="item-content">
                 <div class="item-input">
                   <div v-if="item.isEditing">
@@ -147,18 +137,18 @@ const icon = computed(() => {
                 <div class="item-actions">
                   <div v-if="!item.isEditing" class="edit-delete-buttons">
                     <button @click="editTask(item)">
-                      <img src="src/assets/img/edit.png" />
+                      <img src="/img/edit.png" />
                     </button>
-                    <button @click="deleteTask(item)">
-                      <img src="src/assets/img/delete.png" alt="" />
+                    <button @click="deleteTask(item.id)">
+                      <img src="/img/delete.png" alt="" />
                     </button>
                   </div>
                   <div v-else class="save-close-buttons">
                     <button @click="saveTask(item)">
-                      <img src="src/assets/img/diskettee.png" alt="" />
+                      <img src="/img/diskettee.png" alt="" />
                     </button>
                     <button @click="cancelEdit(item)">
-                      <img src="src/assets/img/closee.png" alt="" />
+                      <img src="/img/closee.png" alt="" />
                     </button>
                   </div>
                 </div>
@@ -168,9 +158,9 @@ const icon = computed(() => {
         </div>
 
         <button class="add-task" @click="togglePopup">
-          <img src="src/assets/img/plus.png" alt="" />
+          <img src="../../public/img/plus.png" alt="" />
         </button>
-        <VPopup v-model:show="isPopupOpen" @apply="applyChanges" />
+        <VPopup v-model:show="isPopupOpen" @apply="createNewTask" />
       </div>
     </div>
   </transition>

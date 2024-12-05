@@ -26,7 +26,7 @@ const toggleCheck = () => {
     @click="toggleCheck"
   >
     <div v-if="isChecked" class="checkmark">
-      <img src="src/assets/img/Rectangle%2018.png" alt="" />
+      <img src="/img/Rectangle%2018.png" alt="" />
     </div>
   </div>
 </template>

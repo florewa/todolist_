@@ -6,8 +6,8 @@ const emits = defineEmits(['toggle-theme'])
 
 const imageSrc = computed(() =>
   props.theme === 'light'
-    ? 'src/assets/img/Vector.svg'
-    : 'src/assets/img/Vector_dark.svg'
+    ? '/img/Vector.svg'
+    : '/img/Vector_dark.svg'
 )
 
 const toggleTheme = () => {

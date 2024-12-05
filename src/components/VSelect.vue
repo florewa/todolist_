@@ -27,7 +27,7 @@ const selectOption = (option) => {
     <div class="select-header" @click="toggleDropdown">
       {{ selectedOption }}
       <span class="arrow" :class="{ open: isOpen }"
-        ><img src="src/assets/img/chevron-top.png" alt="" />
+        ><img src="../../public/img/chevron-top.png" alt="" />
       </span>
     </div>
     <transition name="fade">
