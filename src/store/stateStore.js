@@ -57,20 +57,22 @@ export const useStateStore = defineStore('stateStore', () => {
   const updateTaskStatus = async (id, completed) => {
     const API = window.API
     try {
-      const response = await axios({
-        url: `${API}/tasks/update_status.php`,
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify({
-          id,
-          completed: completed ? 1 : 0,
-        }),
-      })
-      console.log(response.data.message)
+      console.log('Отправка запроса на сервер:', { id, completed })
+      const response = await axios.put(
+        `${API}/tasks/update_status.php`,
+        { id, completed },
+        { headers: { 'Content-Type': 'application/json' } }
+      )
+      console.log('Ответ сервера:', response.data)
+
+      // Обновляем задачу в локальном массиве задач
       const task = tasks.value.find((task) => task.id === id)
-      if (task) task.completed = completed
+      if (task) {
+        task.completed = completed // Здесь изменяем локальный статус задачи
+        console.log('Локальный статус обновлен:', task)
+      }
     } catch (error) {
-      console.error('Ошибка при обновлении статуса задачи:', error)
+      console.error('Ошибка при обновлении статуса:', error)
     }
   }
 

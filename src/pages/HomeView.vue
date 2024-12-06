@@ -76,12 +76,18 @@ const toggleTheme = (newTheme) => {
   }
 }
 
-const toggleTaskStatus = (task) => {
-  const newStatus = task.completed ? 0 : 1
-  store.updateTaskStatus(task.id, newStatus)
-  task.completed = newStatus
-}
+const toggleTaskStatus = async (task) => {
+  console.log('Текущий статус задачи:', task.completed)
+  task.completed = !task.completed
+  console.log('Изменяем на:', task.completed)
 
+  try {
+    await store.updateTaskStatus(task.id, !task.completed)
+    console.log('Статус успешно обновлен на сервере')
+  } catch (error) {
+    console.error('Ошибка при обновлении статуса задачи:', error)
+  }
+}
 
 onMounted(() => {
   document.querySelector('.page').className = `page ${theme.value}`
@@ -118,7 +124,11 @@ const icon = computed(() =>
         <div v-else class="page-list">
           <transition-group name="fade">
             <div v-for="item in searchList" :key="item.id" class="item">
-              <VCheckbox v-model="item.checked" @change="toggleTaskStatus(item)" />
+              <VCheckbox
+                v-model="item.completed"
+                @update:modelValue="toggleTaskStatus(item)"
+              />
+
               <div class="item-content">
                 <div class="item-input">
                   <div v-if="item.isEditing">
@@ -128,7 +138,7 @@ const icon = computed(() =>
                     v-else
                     class="item-title"
                     :style="{
-                      textDecoration: item.checked ? 'line-through' : 'none',
+                      textDecoration: item.completed ? 'line-through' : 'none',
                     }"
                   >
                     {{ item.title }}

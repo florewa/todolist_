@@ -1,19 +1,19 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
-  modelValue: Boolean,
+  modelValue: Boolean, // Свойство для связи через v-model
 })
 
-const emits = defineEmits(['update:modelValue'])
+const emits = defineEmits(['update:modelValue']) // Эмит событий
 
-const isChecked = ref(props.modelValue)
-
-// Следим за изменениями и отправляем их наверх
-watch(isChecked, (newValue) => {
-  emits('update:modelValue', newValue)
+// Привязка локального состояния к modelValue
+const isChecked = computed({
+  get: () => props.modelValue, // Берем значение из props
+  set: (value) => emits('update:modelValue', value), // Эмитим событие
 })
 
+// Переключение состояния при клике
 const toggleCheck = () => {
   isChecked.value = !isChecked.value
 }
@@ -26,7 +26,7 @@ const toggleCheck = () => {
     @click="toggleCheck"
   >
     <div v-if="isChecked" class="checkmark">
-      <img src="/img/Rectangle%2018.png" alt="" />
+      <img src="/img/Rectangle%2018.png" alt="Checked" />
     </div>
   </div>
 </template>
@@ -34,6 +34,7 @@ const toggleCheck = () => {
 <style scoped lang="scss">
 @import '@/assets/scss/variables';
 @import '@/assets/scss/css';
+
 .custom-checkbox {
   width: 26px;
   height: 26px;
