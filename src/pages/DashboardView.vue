@@ -6,8 +6,19 @@ import VSelect from '@/components/VSelect.vue'
 import VPopup from '@/components/VPopup.vue'
 import VToggle from '@/components/VToggle.vue'
 import { useStateStore } from '@/store/stateStore.js'
+import { useRouter } from 'vue-router'
 
 const store = useStateStore()
+
+const router = useRouter()
+
+onMounted(() => {
+  const userId = localStorage.getItem('user_id')
+  if (!userId) {
+    alert('You need to log in first!')
+    router.push('/login') // Перенаправляем на страницу входа
+  }
+})
 
 onMounted(async () => {
   await store.readTasks()
