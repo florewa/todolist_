@@ -9,19 +9,15 @@ import { useStateStore } from '@/store/stateStore.js'
 import { useRouter } from 'vue-router'
 
 const store = useStateStore()
-
 const router = useRouter()
 
-onMounted(() => {
-  const userId = localStorage.getItem('user_id')
-  if (!userId) {
-    alert('You need to log in first!')
-    router.push('/login') // Перенаправляем на страницу входа
-  }
-})
-
 onMounted(async () => {
-  await store.readTasks()
+  // Проверяем, авторизован ли пользователь, путем запроса к серверу
+  try {
+    await store.readTasks()
+  } catch (error) {
+    console.error('Ошибка при загрузке задач:', error)
+  }
 })
 
 const options = ref(['All', 'Checked', 'Unchecked'])
@@ -75,6 +71,7 @@ const isPopupOpen = ref(false)
 const togglePopup = () => {
   isPopupOpen.value = !isPopupOpen.value
 }
+
 const theme = ref(localStorage.getItem('theme') || 'light')
 
 const toggleTheme = (newTheme) => {
@@ -108,6 +105,7 @@ const icon = computed(() =>
   theme.value === 'light' ? '/img/icon-light.png' : '/img/icon-dark.png'
 )
 </script>
+
 
 <template>
   <transition name="fade">

@@ -1,18 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
-import { fi } from 'date-fns/locale'
 
 export const useStateStore = defineStore('stateStore', () => {
   const isLoading = ref(false)
   const tasks = ref([])
+
   const readTasks = async () => {
     const API = window.API
     try {
       isLoading.value = true
-      const response = await axios({
-        baseURL: `${API}/tasks/read.php`,
-        method: 'GET',
+      const response = await axios.get(`${API}/tasks/read.php`, {
         headers: {
           Accept: 'application/json',
         },
@@ -25,14 +23,22 @@ export const useStateStore = defineStore('stateStore', () => {
       isLoading.value = false
     }
   }
-  const createTask = async (task) => {
+
+  const createTask = async () => {
     const API = window.API
     try {
-      const response = await axios.post(`${API}/tasks/create.php`, task, {
-        headers: { 'Content-Type': 'application/json' },
+      const response = await axios.post(`${API}/tasks/create.php`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
-      console.log('Task created:', response.data)
-      await readTasks()
+
+      if (response.data.success) {
+        console.log('Задача успешно создана')
+        await readTasks()
+      } else {
+        console.log('Ошибка при создании задачи: ' + response.data.message)
+      }
     } catch (error) {
       console.error('Ошибка при создании задачи:', error)
     }
@@ -57,7 +63,6 @@ export const useStateStore = defineStore('stateStore', () => {
   const updateTaskStatus = async (id, completed) => {
     const API = window.API
     try {
-      console.log('Отправка запроса на сервер:', { id, completed })
       const response = await axios.put(
         `${API}/tasks/update_status.php`,
         { id, completed },
@@ -65,10 +70,9 @@ export const useStateStore = defineStore('stateStore', () => {
       )
       console.log('Ответ сервера:', response.data)
 
-      // Обновляем задачу в локальном массиве задач
       const task = tasks.value.find((task) => task.id === id)
       if (task) {
-        task.completed = completed // Здесь изменяем локальный статус задачи
+        task.completed = completed
         console.log('Локальный статус обновлен:', task)
       }
     } catch (error) {

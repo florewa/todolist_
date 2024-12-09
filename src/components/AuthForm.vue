@@ -15,22 +15,19 @@ const handleSubmit = async () => {
       email: email.value,
       password: password.value,
     })
+    console.log(response)
 
-    // Проверяем, что вернул сервер
     if (response.data.success) {
-      // Если сервер вернул успех, сохраняем токен и перенаправляем
-      localStorage.setItem('token', response.data.token)
-      // eslint-disable-next-line no-alert
+      // Сохраняем user_id в sessionStorage или localStorage
+      sessionStorage.setItem('user_id', response.data.user_id)
+
       alert('Успешный вход!')
-      await router.push('/dashboard')
+      await router.push('/dashboard') // Перенаправляем на dashboard
     } else {
-      // Если сервер вернул ошибку, выводим сообщение
-      // eslint-disable-next-line no-alert
       alert('Ошибка: ' + response.data.message)
     }
   } catch (error) {
     console.error('Ошибка при авторизации:', error)
-    // eslint-disable-next-line no-alert
     alert('Произошла ошибка. Проверьте подключение к серверу.')
   }
 }
