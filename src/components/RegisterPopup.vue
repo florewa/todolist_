@@ -37,7 +37,7 @@ const handleRegister = async () => {
     }
   } catch (error) {
     console.error('Ошибка при регистрации:', error)
-    errorMessage.value = 'Произошла ошибка. Попробуйте снова.'
+    errorMessage.value = 'An error has occurred. Try again.'
   }
 }
 </script>
@@ -45,51 +45,132 @@ const handleRegister = async () => {
 <template>
   <div class="popup">
     <div class="popup-content">
-      <h2>Register</h2>
-      <form @submit.prevent="handleRegister">
-        <div>
-          <label for="email">Email:</label>
-          <input id="email" v-model="email" type="email" required />
-        </div>
-        <div>
-          <label for="password">Password:</label>
-          <input id="password" v-model="password" type="password" required />
-        </div>
-        <div>
-          <label for="confirm-password">Confirm Password:</label>
+      <div class="popup-content-title">Register</div>
+      <form class="popup-content-form" @submit.prevent="handleRegister">
+        <div class="popup-content-inputs">
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            placeholder="Email:"
+            required
+          />
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            placeholder="Password:"
+            required
+          />
           <input
             id="confirm-password"
             v-model="confirmPassword"
             type="password"
+            placeholder="Confirm password:"
             required
           />
         </div>
-        <button type="submit">Register</button>
-        <button type="button" @click="closePopup">Cancel</button>
-        <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
+        <p v-if="errorMessage" style="margin-bottom: 10px; color: red">
+          {{ errorMessage }}
+        </p>
+        <div class="popup-content-buttons">
+          <button class="register" type="submit">Register</button>
+          <button class="cancel" type="button" @click="closePopup">
+            Cancel
+          </button>
+        </div>
       </form>
     </div>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/assets/scss/variables';
+
 .popup {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-}
 
-.popup-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  width: 300px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  &-content {
+    background: #fff;
+    padding: 18px 30px;
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid #6c63ff;
+    border-radius: 30px;
+
+    &-title {
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 100%;
+      text-transform: uppercase;
+      margin-bottom: 25px;
+    }
+
+    &-form {
+      width: 100%;
+    }
+
+    &-inputs {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 85px;
+
+      input {
+        border: 1px solid #6c63ff;
+        border-radius: 5px;
+        padding: 8px 16px;
+      }
+    }
+
+    &-buttons {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+
+      .register {
+        font-size: 18px;
+        font-weight: 500;
+        background-color: $primary;
+        color: white;
+        padding: 10px 22px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-transform: uppercase;
+
+        &:hover {
+          background-color: darken($primary, 10%);
+        }
+      }
+
+      .cancel {
+        font-size: 18px;
+        font-weight: 500;
+        background-color: transparent;
+        color: $primary;
+        border: 1px solid $primary;
+        padding: 10px 22px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-transform: uppercase;
+
+        &:hover {
+          background-color: darken(white, 10%);
+        }
+      }
+    }
+  }
 }
 </style>

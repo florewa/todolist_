@@ -12,13 +12,18 @@ const store = useStateStore()
 const router = useRouter()
 
 onMounted(async () => {
-  // Проверяем, авторизован ли пользователь, путем запроса к серверу
   try {
     await store.readTasks()
   } catch (error) {
     console.error('Ошибка при загрузке задач:', error)
   }
 })
+
+const logout = () => {
+  store.resetStore()
+  sessionStorage.clear()
+  router.push('/')
+}
 
 const options = ref(['All', 'Checked', 'Unchecked'])
 const selectedOption = ref('ALL')
@@ -91,6 +96,7 @@ const toggleTaskStatus = async (task) => {
 
   try {
     await store.updateTaskStatus(task.id, !task.completed)
+    await store.readTasks()
     console.log('Статус успешно обновлен на сервере')
   } catch (error) {
     console.error('Ошибка при обновлении статуса задачи:', error)
@@ -105,7 +111,6 @@ const icon = computed(() =>
   theme.value === 'light' ? '/img/icon-light.png' : '/img/icon-dark.png'
 )
 </script>
-
 
 <template>
   <transition name="fade">
@@ -122,6 +127,7 @@ const icon = computed(() =>
           <div class="page-toggle">
             <VToggle :theme="theme" @toggle-theme="toggleTheme" />
           </div>
+          <div @click="logout" class="logout-button">Log out</div>
         </div>
         <div v-if="searchList.length === 0" class="no-results">
           <img
@@ -141,7 +147,7 @@ const icon = computed(() =>
               <div class="item-content">
                 <div class="item-input">
                   <div v-if="item.isEditing">
-                    <input v-model="item.editTitle" class="item-title-input" />
+                    <VInput v-model="item.editTitle" class="item-title-input" />
                   </div>
                   <div
                     v-else
@@ -175,7 +181,6 @@ const icon = computed(() =>
             </div>
           </transition-group>
         </div>
-
         <button class="add-task" @click="togglePopup">
           <img src="../../public/img/plus.png" alt="" />
         </button>
@@ -241,6 +246,20 @@ const icon = computed(() =>
     flex: 0 0 93px;
   }
 
+  .logout-button {
+    text-transform: uppercase;
+    background: #f44;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+      background: #d33;
+    }
+  }
+
   &-list {
     padding: 30px 115px;
 
@@ -267,8 +286,7 @@ const icon = computed(() =>
       }
 
       .item-title-input {
-        background: transparent;
-        color: var(--text-color);
+        height: 30px;
       }
 
       .item-actions {

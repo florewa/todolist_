@@ -6,6 +6,9 @@ export const useStateStore = defineStore('stateStore', () => {
   const isLoading = ref(false)
   const tasks = ref([])
 
+  const resetStore = () => {
+    tasks.value = []
+  }
   const readTasks = async () => {
     const API = window.API
     try {
@@ -109,6 +112,7 @@ export const useStateStore = defineStore('stateStore', () => {
   return {
     isLoading,
     tasks,
+    resetStore,
     readTasks,
     createTask,
     deleteTask,
