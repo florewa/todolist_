@@ -21,7 +21,7 @@ const applyChanges = () => {
     description: 'Описание задачи',
     completed: 0,
   }
-  emits('apply', newTask) // Передаём объект задачи
+  emits('apply', newTask)
   closePopup()
 }
 </script>

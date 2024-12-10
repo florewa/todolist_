@@ -1,20 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+const LoginView = () => import('@/pages/LoginView.vue')
+
 const DashboardView = () => import('@/pages/DashboardView.vue')
-const AuthForm = () => import('@/components/AuthForm.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/dashboard',
-      name: 'home',
+      name: 'dashboard',
       component: DashboardView,
     },
     {
       path: '/',
-      name: 'login',
-      component: AuthForm,
+      name: 'register',
+      component: LoginView,
     },
   ],
 })

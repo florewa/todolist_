@@ -24,25 +24,34 @@ export const useStateStore = defineStore('stateStore', () => {
     }
   }
 
-  const createTask = async () => {
+  const createTask = async (newTask) => {
     const API = window.API
+    const userId = sessionStorage.getItem('user_id')
+
+    if (!userId) {
+      console.error('User not authenticated')
+      return
+    }
+
     try {
-      const response = await axios.post(`${API}/tasks/create.php`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const taskData = { ...newTask, user_id: userId }
+
+      const response = await axios.post(`${API}/tasks/create.php`, taskData, {
+        headers: { 'Content-Type': 'application/json' },
       })
 
       if (response.data.success) {
-        console.log('Задача успешно создана')
+        console.log('Задача успешно создана:', response.data.message)
         await readTasks()
       } else {
-        console.log('Ошибка при создании задачи: ' + response.data.message)
+        console.error('Ошибка при создании задачи:', response.data.message)
       }
     } catch (error) {
       console.error('Ошибка при создании задачи:', error)
     }
   }
+
+
 
   const deleteTask = async (id) => {
     const API = window.API

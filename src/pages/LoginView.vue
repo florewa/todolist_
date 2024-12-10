@@ -2,25 +2,25 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import RegisterPopup from '@/components/RegisterPopup.vue'
 
 const email = ref('')
 const password = ref('')
-const errorMessage = ref('')
+const showRegisterPopup = ref(false) // Управление отображением popup
 const router = useRouter()
 
-const handleSubmit = async () => {
+// Логика логина
+const handleLogin = async () => {
   const API = window.API
   try {
     const response = await axios.post(`${API}/tasks/auth.php`, {
       email: email.value,
       password: password.value,
     })
-    console.log(response)
 
     if (response.data.success) {
-      // Сохраняем user_id в sessionStorage или localStorage
       sessionStorage.setItem('user_id', response.data.user_id)
-
+      sessionStorage.getItem('user_id')
       alert('Успешный вход!')
       await router.push('/dashboard') // Перенаправляем на dashboard
     } else {
@@ -36,7 +36,7 @@ const handleSubmit = async () => {
 <template>
   <div>
     <h1>Login</h1>
-    <form @submit.prevent="handleSubmit">
+    <form @submit.prevent="handleLogin">
       <div>
         <label for="email">Email:</label>
         <input id="email" v-model="email" type="email" required />
@@ -46,7 +46,12 @@ const handleSubmit = async () => {
         <input id="password" v-model="password" type="password" required />
       </div>
       <button type="submit">Login</button>
-      <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
     </form>
+    <button @click="showRegisterPopup = true">Register</button>
+
+    <RegisterPopup
+      v-if="showRegisterPopup"
+      @close="showRegisterPopup = false"
+    />
   </div>
 </template>
