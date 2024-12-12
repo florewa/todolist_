@@ -5,6 +5,7 @@ import VCheckbox from '@/components/VCheckbox.vue'
 import VSelect from '@/components/VSelect.vue'
 import VPopup from '@/components/VPopup.vue'
 import VToggle from '@/components/VToggle.vue'
+import TaskPopup from '@/components/TaskPopup.vue'
 import { useStateStore } from '@/store/stateStore.js'
 import { useRouter } from 'vue-router'
 
@@ -27,6 +28,31 @@ const logout = () => {
 
 const toProfile = () => {
   router.push('/profile')
+}
+const isTaskPopupOpen = ref(false) // Состояние для открытия попапа
+const currentTask = ref(null) // Текущая редактируемая задача
+
+// Открытие попапа с выбранной задачей
+const openTaskPopup = (task) => {
+  currentTask.value = { ...task } // Копируем данные задачи
+  console.log(currentTask.value)
+  isTaskPopupOpen.value = true
+}
+
+// Сохранение изменений задачи
+const saveTaskChanges = async (updatedTask) => {
+  console.log('Переданные данные:', updatedTask)
+  try {
+    await store.editTask(
+      updatedTask.id,
+      updatedTask.title,
+      updatedTask.description,
+      updatedTask.deadline
+    )
+    await store.readTasks() // Обновляем список задач
+  } catch (error) {
+    console.error('Ошибка при сохранении задачи:', error)
+  }
 }
 
 const options = ref(['All', 'Checked', 'Unchecked'])
@@ -52,24 +78,6 @@ const searchList = computed(() => {
     task.title.toLowerCase().includes(value.value.toLowerCase())
   )
 })
-
-const editTask = (task) => {
-  task.isEditing = true
-  task.editTitle = task.title
-}
-
-const saveTask = (task) => {
-  if (task.editTitle.trim()) {
-    store.editTask(task.id, task.editTitle.trim())
-    task.title = task.editTitle.trim()
-    task.isEditing = false
-  }
-}
-
-const cancelEdit = (task) => {
-  task.isEditing = false
-  task.editTitle = ''
-}
 
 const deleteTask = (taskId) => {
   store.deleteTask(taskId)
@@ -146,13 +154,13 @@ const hui = () => {
         </div>
         <div v-else class="page-list">
           <transition-group name="fade">
-            <div v-for="item in searchList" :key="item.id" class="item" @click.stop="hui">
+            <div v-for="item in searchList" :key="item.id" class="item">
               <VCheckbox
                 v-model="item.completed"
                 @update:modelValue="toggleTaskStatus(item)"
               />
 
-              <div class="item-content">
+              <div class="item-content" @click="openTaskPopup(item)">
                 <div class="item-input">
                   <div v-if="item.isEditing">
                     <VInput v-model="item.editTitle" class="item-title-input" />
@@ -168,20 +176,9 @@ const hui = () => {
                   </div>
                 </div>
                 <div class="item-actions">
-                  <div v-if="!item.isEditing" class="edit-delete-buttons">
-                    <button @click="editTask(item)">
-                      <img src="/img/edit.png" />
-                    </button>
-                    <button @click="deleteTask(item.id)">
-                      <img src="/img/delete.png" alt="" />
-                    </button>
-                  </div>
-                  <div v-else class="save-close-buttons">
-                    <button @click="saveTask(item)">
-                      <img src="/img/diskettee.png" alt="" />
-                    </button>
-                    <button @click="cancelEdit(item)">
-                      <img src="/img/closee.png" alt="" />
+                  <div v-if="!item.isEditing" class="delete-button">
+                    <button @click.stop="deleteTask(item.id)">
+                      <img src="/img/delete.png" alt="Удалить" />
                     </button>
                   </div>
                 </div>
@@ -189,8 +186,14 @@ const hui = () => {
             </div>
           </transition-group>
         </div>
+        <TaskPopup
+          :show="isTaskPopupOpen"
+          :task="currentTask"
+          @update:show="isTaskPopupOpen = $event"
+          @save="saveTaskChanges"
+        />
         <button class="add-task" @click="togglePopup">
-          <img src="../../public/img/plus.png" alt="" />
+          <img src="/img/plus.png" alt="" />
         </button>
         <VPopup v-model:show="isPopupOpen" @apply="createNewTask" />
       </div>

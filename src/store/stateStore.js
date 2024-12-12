@@ -54,8 +54,6 @@ export const useStateStore = defineStore('stateStore', () => {
     }
   }
 
-
-
   const deleteTask = async (id) => {
     const API = window.API
     try {
@@ -92,18 +90,26 @@ export const useStateStore = defineStore('stateStore', () => {
     }
   }
 
-  const editTask = async (id, newTitle) => {
+  const editTask = async (id, newTitle, newDescription, newDeadline) => {
     const API = window.API
     try {
       const response = await axios({
         url: `${API}/tasks/edit.php`,
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify({ id, title: newTitle }),
+        data: JSON.stringify({
+          id,
+          title: newTitle,
+          description: newDescription,
+          deadline: newDeadline,
+        }),
       })
       console.log(response.data.message)
       const task = tasks.value.find((task) => task.id === id)
-      if (task) task.title = newTitle
+      if (task) {
+        task.title = newTitle
+        task.description = newDescription
+      }
     } catch (error) {
       console.log('Ошибка при редактировании задачи', error)
     }
