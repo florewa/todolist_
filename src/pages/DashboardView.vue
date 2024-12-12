@@ -25,6 +25,10 @@ const logout = () => {
   router.push('/')
 }
 
+const toProfile = () => {
+  router.push('/profile')
+}
+
 const options = ref(['All', 'Checked', 'Unchecked'])
 const selectedOption = ref('ALL')
 const value = ref('')
@@ -110,6 +114,9 @@ onMounted(() => {
 const icon = computed(() =>
   theme.value === 'light' ? '/img/icon-light.png' : '/img/icon-dark.png'
 )
+const hui = () => {
+  console.log('123')
+}
 </script>
 
 <template>
@@ -128,6 +135,7 @@ const icon = computed(() =>
             <VToggle :theme="theme" @toggle-theme="toggleTheme" />
           </div>
           <div @click="logout" class="logout-button">Log out</div>
+          <div @click="toProfile" class="profile-button">Profile</div>
         </div>
         <div v-if="searchList.length === 0" class="no-results">
           <img
@@ -138,7 +146,7 @@ const icon = computed(() =>
         </div>
         <div v-else class="page-list">
           <transition-group name="fade">
-            <div v-for="item in searchList" :key="item.id" class="item">
+            <div v-for="item in searchList" :key="item.id" class="item" @click.stop="hui">
               <VCheckbox
                 v-model="item.completed"
                 @update:modelValue="toggleTaskStatus(item)"

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const LoginView = () => import('@/pages/LoginView.vue')
 const DashboardView = () => import('@/pages/DashboardView.vue')
-
+const ProfileView = () => import('@/pages/ProfileView.vue')
 // Функция проверки аутентификации
 const isAuthenticated = () => !!sessionStorage.getItem('user_id')
 
@@ -24,6 +24,12 @@ const router = createRouter({
     {
       path: '/:catchAll(.*)',
       redirect: '/',
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+      meta: { requiresAuth: true },
     },
   ],
 })
