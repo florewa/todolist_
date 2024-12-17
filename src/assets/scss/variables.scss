@@ -8,8 +8,8 @@ $black: #252525;
 $white: #f7f7f7;
 $white-card: #fafafa;
 $white-active: #d4dae5;
-$primary: #6C63FF;
-$secondary: #f5d980;
+$primary: #6c63ff;
+$secondary: #ff6c63;
 $info: #b7f7db;
 $warning: #ff6327;
 $error: #ff0000;
@@ -33,3 +33,10 @@ $md2: 1240;
 $md3: 992;
 $md4: 768;
 $md5: 540;
+
+:root {
+  --light-background: #ffffff;
+  --light-text-color: #000000;
+  --dark-background: #333333;
+  --dark-text-color: #ffffff;
+}

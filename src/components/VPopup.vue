@@ -9,10 +9,12 @@ defineProps({
 const emits = defineEmits(['update:show', 'apply'])
 
 const newTaskTitle = ref('')
+const newTaskDeadline = ref('')
 
 const closePopup = () => {
   emits('update:show', false)
   newTaskTitle.value = ''
+  newTaskDeadline.value = ''
 }
 
 const applyChanges = () => {
@@ -20,7 +22,9 @@ const applyChanges = () => {
     title: newTaskTitle.value,
     description: 'Описание задачи',
     completed: 0,
+    deadline: newTaskDeadline.value
   }
+  console.log(newTask)
   emits('apply', newTask)
   closePopup()
 }
@@ -30,9 +34,18 @@ const applyChanges = () => {
   <transition name="fade">
     <div v-if="show" class="popup" @click="closePopup">
       <div class="popup-content" @click.stop>
-        <div class="popup-content-title">New note</div>
+        <div class="popup-content-title">New Task</div>
         <div class="popup-content-input">
-          <VInput v-model="newTaskTitle" placeholder="Input your note..." />
+          <VInput v-model="newTaskTitle" placeholder="Input your task title..." />
+        </div>
+        <div class="popup-content-input">
+          <label for="deadline">Deadline</label>
+          <input
+            type="datetime-local"
+            v-model="newTaskDeadline"
+            id="deadline"
+            name="deadline"
+          />
         </div>
         <div class="popup-content-buttons">
           <VButtons :applyAction="applyChanges" :cancelAction="closePopup" />
@@ -70,7 +83,7 @@ const applyChanges = () => {
     }
 
     &-input {
-      margin-bottom: 128px;
+      margin-bottom: 20px;
     }
   }
 }

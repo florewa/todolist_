@@ -6,6 +6,7 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const errorMessage = ref('')
+const successMessage = ref('')
 const emit = defineEmits(['close'])
 
 const closePopup = () => {
@@ -13,6 +14,7 @@ const closePopup = () => {
   password.value = ''
   confirmPassword.value = ''
   errorMessage.value = ''
+  successMessage.value = ''
   emit('close')
 }
 
@@ -30,14 +32,17 @@ const handleRegister = async () => {
     })
 
     if (response.data.success) {
-      alert('Регистрация успешна! Теперь вы можете войти.')
-      closePopup()
+      successMessage.value = 'Registration is successful! Now you can enter.'
+      errorMessage.value = ''
+      setTimeout(closePopup, 3000)
     } else {
       errorMessage.value = response.data.message
+      successMessage.value = ''
     }
   } catch (error) {
     console.error('Ошибка при регистрации:', error)
     errorMessage.value = 'An error has occurred. Try again.'
+    successMessage.value = ''
   }
 }
 </script>
@@ -70,9 +75,8 @@ const handleRegister = async () => {
             required
           />
         </div>
-        <p v-if="errorMessage" style="margin-bottom: 10px; color: red">
-          {{ errorMessage }}
-        </p>
+        <p v-if="errorMessage" class="message error">{{ errorMessage }}</p>
+        <p v-if="successMessage" class="message success">{{ successMessage }}</p>
         <div class="popup-content-buttons">
           <button class="register" type="submit">Register</button>
           <button class="cancel" type="button" @click="closePopup">
@@ -170,6 +174,20 @@ const handleRegister = async () => {
           background-color: darken(white, 10%);
         }
       }
+    }
+  }
+
+  .message {
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+
+    &.error {
+      color: red;
+    }
+
+    &.success {
+      color: green;
     }
   }
 }

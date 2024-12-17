@@ -3,11 +3,12 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import RegisterPopup from '@/components/RegisterPopup.vue'
-import VButtons from '@/components/VButtons.vue'
 
 const email = ref('')
 const password = ref('')
 const showRegisterPopup = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
 const router = useRouter()
 
 // Логика логина
@@ -21,15 +22,18 @@ const handleLogin = async () => {
 
     if (response.data.success) {
       sessionStorage.setItem('user_id', response.data.user_id)
-      sessionStorage.getItem('user_id')
-      alert('Успешный вход!')
-      await router.push('/dashboard')
+      successMessage.value = 'Successful login!'
+      errorMessage.value = ''
+      setTimeout(() => router.push('/dashboard'), 2000)
     } else {
-      alert('Ошибка: ' + response.data.message)
+      errorMessage.value = response.data.message
+      successMessage.value = ''
     }
   } catch (error) {
     console.error('Ошибка при авторизации:', error)
-    alert('Произошла ошибка. Проверьте подключение к серверу.')
+    errorMessage.value =
+      'An error has occurred. Check the connection to the server.'
+    successMessage.value = ''
   }
 }
 </script>
@@ -54,6 +58,8 @@ const handleLogin = async () => {
           required
         />
       </div>
+      <p v-if="errorMessage" class="message error">{{ errorMessage }}</p>
+      <p v-if="successMessage" class="message success">{{ successMessage }}</p>
       <div class="container-form-buttons">
         <button class="login" type="submit">Log in</button>
         <button class="register" @click="showRegisterPopup = true">
@@ -70,6 +76,7 @@ const handleLogin = async () => {
 </template>
 <style scoped lang="scss">
 @import '@/assets/scss/variables';
+
 .container {
   margin-top: 150px;
   padding: 18px 30px;
@@ -145,6 +152,20 @@ const handleLogin = async () => {
           background-color: darken(white, 10%);
         }
       }
+    }
+  }
+
+  .message {
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+
+    &.error {
+      color: red;
+    }
+
+    &.success {
+      color: green;
     }
   }
 }
