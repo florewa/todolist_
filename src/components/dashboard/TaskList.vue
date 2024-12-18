@@ -97,6 +97,7 @@ const toggleTaskStatus = async (task) => {
   padding: 30px 115px;
 
   .item {
+    border-radius: 25px;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -147,11 +148,11 @@ const toggleTaskStatus = async (task) => {
   }
 
   .item.task-red {
-    background-color: $red;
+    background-color: #ff6c63;
   }
 
   .item.task-yellow {
-    background-color: $yellow;
+    background-color: #fcc649;
   }
 }
 </style>
