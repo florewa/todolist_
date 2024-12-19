@@ -3,6 +3,9 @@ import { ref } from 'vue'
 import VInput from '@/components/VInput.vue'
 import VButtons from '@/components/VButtons.vue'
 
+const titleError = ref('')
+const deadlineError = ref('')
+
 defineProps({
   show: Boolean,
 })
@@ -11,6 +14,26 @@ const emits = defineEmits(['update:show', 'apply'])
 const newTaskTitle = ref('')
 const newTaskDeadline = ref('')
 
+const validateFields = () => {
+  let isValid = true
+
+  if (!newTaskTitle.value.trim()) {
+    titleError.value = 'Task title is required'
+    isValid = false
+  } else {
+    titleError.value = ''
+  }
+
+  if (!newTaskDeadline.value) {
+    deadlineError.value = 'Deadline is required'
+    isValid = false
+  } else {
+    deadlineError.value = ''
+  }
+
+  return isValid
+}
+
 const closePopup = () => {
   emits('update:show', false)
   newTaskTitle.value = ''
@@ -18,11 +41,15 @@ const closePopup = () => {
 }
 
 const applyChanges = () => {
+  if (!validateFields()) {
+    return
+  }
+
   const newTask = {
     title: newTaskTitle.value,
     description: 'Описание задачи',
     completed: 0,
-    deadline: newTaskDeadline.value
+    deadline: newTaskDeadline.value,
   }
   console.log(newTask)
   emits('apply', newTask)
@@ -36,7 +63,11 @@ const applyChanges = () => {
       <div class="popup-content" @click.stop>
         <div class="popup-content-title">New Task</div>
         <div class="popup-content-input">
-          <VInput v-model="newTaskTitle" placeholder="Input your task title..." />
+          <VInput
+            v-model="newTaskTitle"
+            placeholder="Input your task title..."
+          />
+          <p v-if="titleError" class="error-message">{{ titleError }}</p>
         </div>
         <div class="popup-content-input">
           <label for="deadline">Deadline</label>
@@ -45,7 +76,18 @@ const applyChanges = () => {
             v-model="newTaskDeadline"
             id="deadline"
             name="deadline"
+            style="
+              width: 100%;
+              height: 38px;
+              font-family: $fontSecond;
+              border-radius: 8px;
+              border: var(--input-border);
+              padding: 11px 16px;
+              color: var(--text-color);
+              background: transparent;
+            "
           />
+          <p v-if="deadlineError" class="error-message">{{ deadlineError }}</p>
         </div>
         <div class="popup-content-buttons">
           <VButtons :applyAction="applyChanges" :cancelAction="closePopup" />
@@ -58,6 +100,7 @@ const applyChanges = () => {
 <style lang="scss">
 @import '@/assets/scss/variables';
 @import '@/assets/scss/css';
+
 .popup {
   position: fixed;
   inset: 0;
@@ -85,6 +128,13 @@ const applyChanges = () => {
     &-input {
       margin-bottom: 20px;
     }
+  }
+
+  .error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 4px;
+    text-align: left;
   }
 }
 </style>

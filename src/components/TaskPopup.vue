@@ -1,19 +1,20 @@
 <script setup>
 import { defineProps, defineEmits, reactive, watch } from 'vue'
+import VInput from '@/components/VInput.vue'
+import VTextarea from '@/components/VTextarea.vue'
 
 const props = defineProps({
-  show: Boolean, // Управляет видимостью попапа
+  show: Boolean,
   task: {
     type: Object,
-    required: true, // Передаётся задача, которую редактируем
+    required: true,
   },
 })
 
-const emit = defineEmits(['update:show', 'save']) // События для закрытия и сохранения
+const emit = defineEmits(['update:show', 'save'])
 
-const editableTask = reactive({}) // Локальная копия задачи
+const editableTask = reactive({})
 
-// Создаём копию задачи для редактирования при её изменении
 watch(
   () => props.task,
   (newTask) => {
@@ -22,54 +23,107 @@ watch(
   { immediate: true }
 )
 
-// Закрытие попапа
 const closePopup = () => {
-  emit('update:show', false) // Закрываем попап
+  emit('update:show', false)
+}
+const errors = reactive({
+  title: '',
+  description: '',
+  deadline: '',
+})
+
+const validateFields = () => {
+  let isValid = true
+
+  // Проверяем поле "title"
+  if (!editableTask.title || !editableTask.title.trim()) {
+    errors.title = 'The name of the task is required'
+    isValid = false
+  } else {
+    errors.title = ''
+  }
+
+  // Проверяем поле "description"
+  if (!editableTask.description || !editableTask.description.trim()) {
+    errors.description = 'The task description is required'
+    isValid = false
+  } else {
+    errors.description = ''
+  }
+
+  // Проверяем поле "deadline"
+  if (!editableTask.deadline) {
+    errors.deadline = 'The deadline date is required'
+    isValid = false
+  } else {
+    errors.deadline = ''
+  }
+
+  return isValid
 }
 
-// Сохранение изменений
 const saveChanges = () => {
-  emit('save', { ...editableTask }) // Отправляем обновлённую задачу
-  closePopup() // Закрываем попап
+  if (!validateFields()) {
+    return
+  }
+  emit('save', { ...editableTask })
+  closePopup()
 }
 </script>
 
 <template>
   <div class="popup-overlay" v-if="show" @click.self="closePopup">
     <div class="popup">
-      <h2>Редактировать задачу</h2>
+      <h2>Edit a task</h2>
       <label>
         Название:
-        <input
+        <VInput
           type="text"
           v-model="editableTask.title"
-          placeholder="Введите название"
+          placeholder="Enter a name"
         />
       </label>
+      <p v-if="errors.title" class="error-message">{{ errors.title }}</p>
       <label>
         Описание:
-        <textarea
+        <VTextarea
           v-model="editableTask.description"
-          placeholder="Введите описание"
+          placeholder="Enter a description"
           rows="5"
-        ></textarea>
+        ></VTextarea>
       </label>
+      <p v-if="errors.description" class="error-message">
+        {{ errors.description }}
+      </p>
       <label for="deadline">Deadline</label>
       <input
         type="datetime-local"
         v-model="editableTask.deadline"
         id="deadline"
         name="deadline"
+        style="
+          width: 100%;
+          height: 38px;
+          font-family: $fontSecond;
+          border-radius: 8px;
+          border: var(--input-border);
+          padding: 11px 16px;
+          color: var(--text-color);
+          background: transparent;
+        "
       />
+      <p v-if="errors.deadline" class="error-message">{{ errors.deadline }}</p>
       <div class="popup-actions">
-        <button @click="saveChanges">Сохранить</button>
-        <button @click="closePopup">Отмена</button>
+        <button class="btn-save" @click="saveChanges">Save</button>
+        <button class="btn-cancel" @click="closePopup">Cancel</button>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/assets/scss/variables';
+@import '@/assets/scss/css';
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -100,6 +154,37 @@ const saveChanges = () => {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+
+  .btn-save {
+    font-size: 18px;
+    font-weight: 500;
+    background-color: $primary;
+    color: white;
+    padding: 10px 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+
+    &:hover {
+      background-color: darken($primary, 10%);
+    }
+  }
+
+  .btn-cancel {
+    font-size: 18px;
+    font-weight: 500;
+    background-color: transparent;
+    color: $primary;
+    border: 1px solid $primary;
+    padding: 10px 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+
+    &:hover {
+      background-color: darken(white, 10%);
+    }
+  }
 }
 
 textarea,
